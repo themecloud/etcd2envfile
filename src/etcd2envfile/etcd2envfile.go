@@ -16,22 +16,10 @@ import (
 	"github.com/coreos/etcd/client"
 )
 
-var endpoint = flag.String(
-	"etcd",
-	"http://127.0.0.1:2379",
-	"Specifies the etcd endpoint",
-)
-
-var outputDir = flag.String(
-	"outputDir",
-	"/run/conf",
-	"Specifies the output dir",
-)
-
-var etcdPrefix = flag.String(
-	"etcdPrefix",
-	"",
-	"Specifies the etcd prefix",
+var (
+	endpoint  = flag.String("etcd", "http://127.0.0.1:2379", "Specifies the etcd endpoint")
+	outputDir = flag.String("outputDir", "/run/conf", "Specifies the output dir")
+	etcdPrefix = flag.String("etcdPrefix", "", "Specifies the etcd prefix")
 )
 
 func getKeyName(node *client.Node) string {
