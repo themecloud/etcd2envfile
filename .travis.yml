@@ -25,3 +25,4 @@ deploy:
   on:
     repo: themecloud/etcd2envfile
     tags: true
+    go: 1.5
