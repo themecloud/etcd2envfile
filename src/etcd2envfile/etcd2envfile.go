@@ -9,16 +9,16 @@ import (
 	"bytes"
 	"strings"
 
-	"os"
 	"io/ioutil"
+	"os"
 
 	"github.com/coreos/etcd/Godeps/_workspace/src/golang.org/x/net/context"
 	"github.com/coreos/etcd/client"
 )
 
 var (
-	endpoint  = flag.String("etcd", "http://127.0.0.1:2379", "Specifies the etcd endpoint")
-	outputDir = flag.String("outputDir", "/run/conf", "Specifies the output dir")
+	endpoint   = flag.String("etcd", "http://127.0.0.1:2379", "Specifies the etcd endpoint")
+	outputDir  = flag.String("outputDir", "/run/conf", "Specifies the output dir")
 	etcdPrefix = flag.String("etcdPrefix", "", "Specifies the etcd prefix")
 )
 
@@ -51,11 +51,11 @@ func generateConfig(c client.Client) {
 	kapi := client.NewKeysAPI(c)
 
 	for {
-		resp, err := kapi.Get(context.Background(), *etcdPrefix, &client.GetOptions { Recursive: true })
+		resp, err := kapi.Get(context.Background(), *etcdPrefix, &client.GetOptions{Recursive: true})
 		panicOnError(err)
 		traverseConfigDirectory(resp.Node)
 
-		watcher := kapi.Watcher(*etcdPrefix, &client.WatcherOptions { Recursive: true, AfterIndex: resp.Index })
+		watcher := kapi.Watcher(*etcdPrefix, &client.WatcherOptions{Recursive: true, AfterIndex: resp.Index})
 		ctx := context.Background()
 
 		resp, err = watcher.Next(ctx)
@@ -66,13 +66,17 @@ func generateConfig(c client.Client) {
 
 func dirExists(path string) (bool, error) {
 	_, err := os.Stat(path)
-	if err == nil { return true, nil }
-	if os.IsNotExist(err) { return false, nil }
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
 	return true, err
 }
 
 func panicOnError(err error) {
-	if(err != nil) {
+	if err != nil {
 		log.Fatal(err)
 		panic(err)
 	}
@@ -84,14 +88,14 @@ func main() {
 	exists, err := dirExists(*outputDir)
 	panicOnError(err)
 
-	if(! exists) {
+	if !exists {
 		err := os.Mkdir(*outputDir, 0755)
 		panicOnError(err)
 	}
 
 	cfg := client.Config{
-		Endpoints:               []string{ *endpoint },
-		Transport:               client.DefaultTransport,
+		Endpoints: []string{*endpoint},
+		Transport: client.DefaultTransport,
 		// set timeout per request to fail fast when the target endpoint is unavailable
 		HeaderTimeoutPerRequest: time.Second,
 	}
@@ -101,4 +105,3 @@ func main() {
 
 	generateConfig(c)
 }
-
