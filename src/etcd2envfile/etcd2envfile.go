@@ -19,7 +19,7 @@ import (
 var (
 	endpoint   = flag.String("etcd", "http://127.0.0.1:2379", "Specifies the etcd endpoint")
 	outputDir  = flag.String("outputDir", "/run/conf", "Specifies the output dir")
-	etcdPrefix = flag.String("etcdPrefix", "", "Specifies the etcd prefix")
+	etcdPrefix = flag.String("etcdPrefix", "/conf", "Specifies the etcd prefix")
 )
 
 func getKeyName(node *client.Node) string {
