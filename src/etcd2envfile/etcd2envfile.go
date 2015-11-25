@@ -52,15 +52,18 @@ func generateConfig(c client.Client) {
 
 	for {
 		resp, err := kapi.Get(context.Background(), *etcdPrefix, &client.GetOptions{Recursive: true})
-		panicOnError(err)
+		if err != nil {
+			log.Fatal(err)
+		}
 		traverseConfigDirectory(resp.Node)
 
 		watcher := kapi.Watcher(*etcdPrefix, &client.WatcherOptions{Recursive: true, AfterIndex: resp.Index})
 		ctx := context.Background()
 
 		resp, err = watcher.Next(ctx)
-
-		panicOnError(err)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
@@ -75,22 +78,18 @@ func dirExists(path string) (bool, error) {
 	return true, err
 }
 
-func panicOnError(err error) {
-	if err != nil {
-		log.Fatal(err)
-		panic(err)
-	}
-}
-
 func main() {
 	flag.Parse()
 
 	exists, err := dirExists(*outputDir)
-	panicOnError(err)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	if !exists {
-		err := os.Mkdir(*outputDir, 0755)
-		panicOnError(err)
+		if err := os.Mkdir(*outputDir, 0755); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	cfg := client.Config{
@@ -101,7 +100,9 @@ func main() {
 	}
 
 	c, err := client.New(cfg)
-	panicOnError(err)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	generateConfig(c)
 }
