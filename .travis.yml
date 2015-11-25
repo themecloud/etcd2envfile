@@ -1,0 +1,22 @@
+language: go
+go:
+- 1.5
+- tip
+install:
+  - go get github.com/constabulary/gb/...
+  - go get github.com/golang/lint/golint
+before_script:
+  - gb vendor restore
+script: 
+  - gb test
+  - go tool vet src/
+  - golint src/
+
+deploy:
+  provider: releases
+  api_key:
+    secure: IVkbM34mXQlfioTB6R2Wtu23QBRfo9u8XjAtOdEyQh7y89ZICH+NQlT3rTZ/lQg2rq2NtY17yLZi9FoOBuu8sv1NtvA0zDpYop6FdFTyPBZPe0w4qXDv62jaThu5F2KfZMqCh0jIW7c3RX7Xm0pvUQPeTlRz+j7VPvsWz7NuOm5i9p6W3TPd5jGmtohyhBPoE7b1BKoF/NQTqZukNGLIbIqzFW53Ub0Z69kt0WAttFxxvFludZ2X4Bk045zpwM/k2cOtUiJ8IVLKpxIQZSRkFnH9b1NFUfzvCd3H/94eJe/++kg51LIBvBwt1PR9kgpfes1KdCXkLhN2/46XbLsRqQmZcF6P1nuIrGUJs++BBXRJYVYKQQcRRSkLgHg+hgvlWaOT++OiOY9RKVdiaCTWBun94kQMPvYBUBKh8imbiEvTECrNVWe9MGB9Bq/6jU5i81y01UOOHQqz3V15xDVttMZPMALHqXpnDc8wecop8YjoK14qDlfJ2eeXGqCHSXpXvtRByW179u/XOqjU6YwRbHRuOpyRrBUD4+JujVCFAolCOOuvfRxHtwJSUpSb0mwmkuYLTRjk9qN84FTfrpb4Sb5ynFRnnTnzNPgnqiIWt08lYPbipPtrN/7MR9abFMWmArDrFqD+nC6l0EcIn8MAO3fqbVPHE1cvcNZf7r72txA=
+  file: bin/etcd2envfile
+  on:
+    repo: themecloud/etcd2envfile
+    tags: true
