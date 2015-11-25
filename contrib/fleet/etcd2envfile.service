@@ -1,0 +1,15 @@
+[Unit]
+Description=etcd2envfile daemon
+
+[Service]
+ExecStartPre=/usr/bin/mkdir -p /opt/bin/
+ExecStartPre=-/usr/bin/wget -N -P /opt/bin/ https://github.com/themecloud/etcd2envfile/releases/download/v0.0.1/etcd2envfile-linux-amd64
+ExecStartPre=/usr/bin/ln -sf /opt/bin/etcd2envfile-linux-amd64 /opt/bin/etcd2envfile
+ExecStartPre=/usr/bin/chmod +x /opt/bin/etcd2envfile
+
+ExecStart=/opt/bin/etcd2envfile
+Restart=always
+RestartSec=10
+
+[X-Fleet]
+Global=true
