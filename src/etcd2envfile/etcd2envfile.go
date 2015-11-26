@@ -104,5 +104,9 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if err := c.Sync(context.Background()); err != nil {
+		log.Fatal(err)
+	}
+
 	generateConfig(c)
 }
