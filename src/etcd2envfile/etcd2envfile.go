@@ -14,6 +14,9 @@ import (
 
 	"github.com/coreos/etcd/Godeps/_workspace/src/golang.org/x/net/context"
 	"github.com/coreos/etcd/client"
+
+	"github.com/coreos/go-systemd/daemon"
+	systemdutil "github.com/coreos/go-systemd/util"
 )
 
 var (
@@ -47,24 +50,26 @@ func traverseConfigDirectory(configDirectories *client.Node) {
 	}
 }
 
-func generateConfig(c client.Client) {
-	kapi := client.NewKeysAPI(c)
-
-	for {
-		resp, err := kapi.Get(context.Background(), *etcdPrefix, &client.GetOptions{Recursive: true})
-		if err != nil {
-			log.Fatal(err)
-		}
-		traverseConfigDirectory(resp.Node)
-
-		watcher := kapi.Watcher(*etcdPrefix, &client.WatcherOptions{Recursive: true, AfterIndex: resp.Index})
-		ctx := context.Background()
-
-		resp, err = watcher.Next(ctx)
-		if err != nil {
-			log.Fatal(err)
-		}
+func generateConfig(kapi client.KeysAPI) (*client.Response, error) {
+	resp, err := kapi.Get(context.Background(), *etcdPrefix, &client.GetOptions{Recursive: true})
+	if err != nil {
+		return resp, err
 	}
+	traverseConfigDirectory(resp.Node)
+	return resp, nil
+}
+
+func generateConfigWatcher(kapi client.KeysAPI, resp *client.Response) (*client.Response, error) {
+
+	watcher := kapi.Watcher(*etcdPrefix, &client.WatcherOptions{Recursive: true, AfterIndex: resp.Index})
+	ctx := context.Background()
+
+	resp, err := watcher.Next(ctx)
+	if err != nil {
+		return resp, err
+	}
+	return generateConfig(kapi)
+
 }
 
 func dirExists(path string) (bool, error) {
@@ -108,5 +113,26 @@ func main() {
 		log.Fatal(err)
 	}
 
-	generateConfig(c)
+	kapi := client.NewKeysAPI(c)
+
+	resp, err := generateConfig(kapi)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if systemdutil.IsRunningSystemd() {
+		err := daemon.SdNotify("READY=1")
+		if err != nil {
+			log.Printf("failed to notify systemd for readiness: %v", err)
+			if err == daemon.SdNotifyNoSocket {
+				log.Printf("forgot to set Type=notify in systemd service file?")
+			}
+		}
+	}
+	for {
+		resp, err = generateConfigWatcher(kapi, resp)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	os.Exit(0)
 }

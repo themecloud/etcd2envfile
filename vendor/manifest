@@ -35,6 +35,20 @@
 			"revision": "0777cda4ea3b56245e44a122a875bee3f2d0f974",
 			"branch": "master",
 			"path": "/pkg/types"
+		},
+		{
+			"importpath": "github.com/coreos/go-systemd/daemon",
+			"repository": "https://github.com/coreos/go-systemd",
+			"revision": "2ed5b5012ccde5f057c197890a2c801295941149",
+			"branch": "master",
+			"path": "/daemon"
+		},
+		{
+			"importpath": "github.com/coreos/go-systemd/util",
+			"repository": "https://github.com/coreos/go-systemd",
+			"revision": "2ed5b5012ccde5f057c197890a2c801295941149",
+			"branch": "master",
+			"path": "/util"
 		}
 	]
 }
