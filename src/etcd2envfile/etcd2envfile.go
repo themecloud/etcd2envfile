@@ -23,6 +23,7 @@ var (
 	endpoint   = flag.String("etcd", "http://127.0.0.1:2379", "Specifies the etcd endpoint")
 	outputDir  = flag.String("outputDir", "/run/conf", "Specifies the output dir")
 	etcdPrefix = flag.String("etcdPrefix", "/conf", "Specifies the etcd prefix")
+	watch      = flag.Bool("watch", true, "Watch for new values on etcd")
 )
 
 func getKeyName(node *client.Node) string {
@@ -128,10 +129,12 @@ func main() {
 			}
 		}
 	}
-	for {
-		resp, err = generateConfigWatcher(kapi, resp)
-		if err != nil {
-			log.Fatal(err)
+	if *watch {
+		for {
+			resp, err = generateConfigWatcher(kapi, resp)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 	os.Exit(0)
