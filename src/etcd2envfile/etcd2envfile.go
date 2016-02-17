@@ -12,6 +12,8 @@ import (
 	"io/ioutil"
 	"os"
 
+	"environment"
+
 	"github.com/coreos/etcd/Godeps/_workspace/src/golang.org/x/net/context"
 	"github.com/coreos/etcd/client"
 
@@ -20,10 +22,11 @@ import (
 )
 
 var (
-	endpoint   = flag.String("etcd", "http://127.0.0.1:2379", "Specifies the etcd endpoint")
-	outputDir  = flag.String("outputDir", "/run/conf", "Specifies the output dir")
-	etcdPrefix = flag.String("etcdPrefix", "/conf", "Specifies the etcd prefix")
-	watch      = flag.Bool("watch", true, "Watch for new values on etcd")
+	endpoint        = flag.String("etcd", "http://127.0.0.1:2379", "Specifies the etcd endpoint")
+	outputDir       = flag.String("outputDir", "/run/conf", "Specifies the output dir")
+	etcdPrefix      = flag.String("etcdPrefix", "/conf", "Specifies the etcd prefix")
+	watch           = flag.Bool("watch", true, "Watch for new values on etcd")
+	escapeBackslash = flag.Bool("escapeBackslash", false, "Useful when using systemd EnvironmentFile")
 )
 
 func getKeyName(node *client.Node) string {
@@ -36,7 +39,11 @@ func getConfigFile(configDirectory *client.Node) []byte {
 
 	for _, key := range configDirectory.Nodes {
 		envVariable := getKeyName(key)
-
+		// Manage mutli-line values
+		key.Value = environment.OneLine(key.Value, false)
+		if *escapeBackslash {
+			key.Value = strings.Replace(key.Value, "\\", "\\\\", -1)
+		}
 		buffer.WriteString(envVariable + "=" + key.Value + "\n")
 	}
 	return buffer.Bytes()
