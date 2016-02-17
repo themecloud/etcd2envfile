@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 
 	"log"
 	"time"
@@ -38,13 +39,12 @@ func getConfigFile(configDirectory *client.Node) []byte {
 	var buffer bytes.Buffer
 
 	for _, key := range configDirectory.Nodes {
-		envVariable := getKeyName(key)
 		// Manage mutli-line values
 		key.Value = environment.OneLine(key.Value, false)
 		if *escapeBackslash {
 			key.Value = strings.Replace(key.Value, "\\", "\\\\", -1)
 		}
-		buffer.WriteString(envVariable + "=" + key.Value + "\n")
+		buffer.WriteString(fmt.Sprintf("%s=%s\n", strings.ToUpper(getKeyName(key)), key.Value))
 	}
 	return buffer.Bytes()
 }
